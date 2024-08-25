@@ -89,3 +89,4 @@ def collect_data(conn_string = "sqlite:///00_database/bike_orders_database.sqlit
     return df
 
 collect_data()
+?collect_data()
