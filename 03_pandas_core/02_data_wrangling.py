@@ -71,38 +71,77 @@ df2 = df.drop(['model', 'category_1', 'category_2'], axis = 1) #axis is defaulte
 pd.concat([df1, df2], axis =1)
 
 # Dropping Columns (De-selecting)
-
+df.drop(['model', 'category_1', 'category_2'], axis = 1)
 
 
 # 2.0 ARRANGING ROWS ----
+df.sort_values('total_price')
 
+df.sort_values('order_date', ascending= False)
 
-
+df['price'].sort_values(ascending= False)
 
 # 3.0 FILTERING  ----
 
 # Simpler Filters
+df.order_date >= pd.to_datetime("2015-01-01")
+df[df.order_date >= pd.to_datetime("2015-01-01")]
 
+df[df.model == "Trigger Carbon 1"]
 
+df[df.model.str.startswith("Trigger")]
+
+df[df.model.str.contains("Carbon")]
 # Query
 
+price_threshold1 = 5000
+
+price_threshold2 = 1000
+
+df.query("(price >= @price_threshold1) | (price <= @price_threshold2)")
+df.query(f"price >= {price_threshold1}")
 
 # Filtering Items in a List
+df['category_2'].unique()
+df['category_2'].value_counts()
+df[df['category_2'].isin(['Triathalon', 'Over Mountain'])]
 
+df[ ~df['category_2'].isin(['Triathalon', 'Over Mountain'])]
 
 # Slicing
+#row-wise slicing
 
+df[:5] #first 5, from 0 to 4
+df.head(5)
+df.tail(5)
 
 # Index Slicing
+df.iloc[0:5, [1,3,5]] #can slice row and column wise
 
+df.iloc[0:5, :] #first 5 rows and all columns
 
+df.iloc[ : , [1,3,5]] #all rows only columns 1, 3, 5 
+ 
 # Unique / Distinct Values
+df[['model', 'category_1', 'category_2', 'frame_material']]\
+   .drop_duplicates()
 
-
+df['model'].unique()
 # Top / Bottom
 
+df.nlargest(n = 20, columns= 'total_price')
+
+df['total_price'].nlargest(n = 20)
+df['total_price'].nsmallest(n=20)
 
 # Sampling Rows
+
+df.sample(n = 10, random_state= 123) #random state is same as set seed
+
+df.sample(frac = 0.10, random_state= 123) #10% of data returned
+
+
+
 
 
 
