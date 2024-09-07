@@ -141,38 +141,105 @@ df.sample(n = 10, random_state= 123) #random state is same as set seed
 df.sample(frac = 0.10, random_state= 123) #10% of data returned
 
 
-
-
-
-
 # 4.0 ADDING CALCULATED COLUMNS (MUTATING) ----
 
 
 # Method 1 - Series Notations
+df2 = df.copy()
 
+df2['new_col'] = df2['price'] *df2['quantity']
+df2
 
+df2['new_col_2'] = df2['model'].str.lower()
+df2
 # Method 2 - assign (Great for method chaining)
+df.assign(frame_material = lambda x: x['frame_material'].str.lower())
+
+df.assign(frame_material_lower = lambda x: x['frame_material'].str.lower())
+
+df[['model', 'price']] \
+   .drop_duplicates() \
+   .assign(price = lambda x: np.log(x['price'])) \
+   .set_index('model') \
+   .plot(kind = 'hist') 
+   
+
+   
+# Adding Flags (True/False) booleans
+
+#text mining
+"Supersix Evo Hi-Mod Team".lower().find("supersix") >=0
 
 
+df.assign(flag_supersix = lambda x: x['model'].str.lower().str.contains("supersix"))
 
-# Adding Flags (True/False)
-
+df['model'].str.lower().str.contains("supersix") 
 
 
 # Binning
+pd.cut(df.price, bins = 3, labels = ['low', 'medium', 'high']).astype("str")
 
+df[['model', 'price']] \
+   .drop_duplicates() \
+   .assign(price_group = lambda x: pd.cut(x.price, bins = 3)) \
+   .pivot(
+      index = 'model',
+      columns = 'price_group',
+      values = 'price'
+   ) \
+   .style.background_gradient(cmap = 'Blues')
+   
+pd.qcut(df.price, q =[0, 0.3, 0.66,1], labels = ['low', 'medium', 'high'])
 
+pd.cut(df.price, bins = 3, labels = ['low', 'medium', 'high']).astype("str")
+
+df[['model', 'price']] \
+   .drop_duplicates() \
+   .assign(price_group = lambda x: pd.qcut(x.price, q = 3)) \
+   .pivot(
+      index = 'model',
+      columns = 'price_group',
+      values = 'price'
+   ) \
+   .style.background_gradient(cmap = 'Blues')
 
 # 5.0 GROUPING  ----
 
 # 5.1 Aggregations (No Grouping)
-
-
+df[['total_price']].sum().to_frame()
+#selects on numeric cols
+df \
+   .select_dtypes(exclude = ['object']) \
+   .drop('order_date', axis = 1) \
+   .sum()
+   
+df \
+   .select_dtypes(exclude = ['object']) \
+   .drop('order_date', axis = 1) \
+   .agg([np.sum, np.mean, np.std])
+   
+df.agg(
+   {
+      'quantity': np.sum, 
+      'total_price': [np.sum, np.mean]
+   }
+)
 # Common Summaries
+
+df['model'].value_counts()
+
+df[['model', 'category_1']].value_counts()
+
+df.nunique()
+
+df.isna()
+
+df.isna().sum()
 
 
 # 5.2 Groupby + Agg
-
+df
+df.groupby(['city']).sum()
 
 # Get the sum and median by groups
 
