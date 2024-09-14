@@ -239,37 +239,95 @@ df.isna().sum()
 
 # 5.2 Groupby + Agg
 df
-df.groupby(['city']).sum()
+df\
+   .groupby(['city','state'])\
+   .agg(dict(quantity    = np.sum,
+             total_price = [np.sum, np.mean]))
 
 # Get the sum and median by groups
-
+summary_df_1 = df[['category_1','category_2', 'total_price']] \
+   .groupby(['category_1', 'category_2']) \
+   .agg([np.sum, np.mean])  \
+   .reset_index()
+   
+summary_df_1
 
 # Apply Summary Functions to Specific Columns
-
+summary_df_2 = df[['category_1', 'category_2', 'total_price', 'quantity']] \
+   .groupby(['category_1', 'category_2']) \
+   .agg({
+        'quantity' : np.sum, 
+        'total_price': np.sum
+        }
+      ) \
+   .reset_index()
+   
+summary_df_2
 
 # Detecting NA
+summary_df_1.columns #mulit-level index, this created tuples 
+summary_df_1.isna().sum() #shows na's or 0 if none are missing
+summary_df_1.isna().sum().index #on indicies and not as col counts
 
-
-# 5.3 Groupby + Transform 
+# 5.3 Groupby + Transform (Apply Function)
 # - Note: Groupby + Assign does not work. No assign method for groups.
+#time series analysis 
+summary_df_3 = df[['category_2', 'order_date', 'total_price', 'quantity']]\
+   .groupby(['category_2',pd.Grouper(key='order_date',freq='W',origin='start'),])\
+   .agg(np.sum)\
+   .reset_index()     
+  
+#Standardizes total price column    
+summary_df_3 \
+   .set_index('order_date') \
+   .groupby('category_2') \
+   .apply(lambda x: (x.total_price - x. total_price.mean()) / x.total_price.std()) \
+   .reset_index() \
+   .pivot(
+      index = "order_date",
+      columns = "category_2",
+      values = "total_price"
+   ) \
+   .plot()
+   
+#Standardizing mulitple columns
+summary_df_3  \
+   .set_index(['order_date','category_2']) \
+   .apply(lambda x:(x - x.mean())/ x.std()) \
+   .reset_index()
 
+# 5.4 Groupby + Filter (Apply Function)
 
-# 5.4 Groupby + Filter
+df.tail(5)
 
-
-
+summary_df_3 \
+   .groupby('category_2') \
+   .tail(5)
+   
+summary_df_3 \
+   .groupby('category_2') \
+   .apply(lambda x: x.iloc[10:20])
 
 # 6.0 RENAMING ----
 
 # Single Index
+summary_df_2 \
+   .rename(columns = dict(category_1 = "Category_1"))
 
-
+summary_df_2 \
+   .rename(columns = lambda x: x.replace("_", " ").title())
+   
 # Targeting specific columns
-
+summary_df_2 \
+   .rename(columns = {'total_price' : 'Revenue' })
 
 # - Mult-Index
 
+["_".join(col).rstrip("_") for col in summary_df_1.columns.tolist()]
 
+summary_df_1 \
+   .set_axis(["_".join(col).rstrip("_") for col in summary_df_1.columns.tolist()], 
+             axis = 1)
 
 # 7.0 RESHAPING (MELT & PIVOT_TABLE) ----
 
