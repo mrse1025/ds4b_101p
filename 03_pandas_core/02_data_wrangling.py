@@ -332,16 +332,104 @@ summary_df_1 \
 # 7.0 RESHAPING (MELT & PIVOT_TABLE) ----
 
 # Aggregate Revenue by Bikeshop by Category 1 
-
+bikeshop_revenue_df = df[['bikeshop_name', 'category_1', 'total_price']] \
+   .groupby(['bikeshop_name', 'category_1']) \
+   .sum() \
+   .reset_index() \
+   .sort_values('total_price', ascending = False) \
+   .rename(columns = lambda x: x.replace("_", " ").title())
 
 # 7.1 Pivot & Melt 
 
 # Pivot (Pivot Wider)
+bikeshop_revenue_wide_df = bikeshop_revenue_df \
+   .pivot(
+      index = ['Bikeshop Name'],
+      columns = ['Category 1'],
+      values = ['Total Price']
+   ) \
+   .reset_index() \
+   .set_axis(
+      labels = ["Bikeshop Name", "Mountain", "Road"], 
+      axis = 1
+   )
 
+#formatting
+bikeshop_revenue_wide_df \
+   .sort_values("Mountain") \
+   .plot(x = "Bikeshop Name", 
+                              y = ["Mountain", "Road"], 
+                              kind = "barh"
+                              )
+
+from mizani.formatters import dollar_format
+
+usd= dollar_format(prefix = "$", digits = 0, big_mark = ",")
+
+bikeshop_revenue_wide_df \
+   .sort_values("Mountain", ascending = False) \
+   .style \
+   .highlight_max() \
+   .format(
+      {
+         "Mountain" : lambda x: "$"+ str(x)
+      }
+   )   
+   
+bikeshop_revenue_wide_df \
+   .sort_values("Mountain", ascending = False) \
+   .style \
+   .highlight_max(subset = ["Mountain", "Road"]) \
+   .format(
+      {
+         "Mountain" : lambda x: usd([x])[0], 
+         "Road" : lambda x : usd([x])[0]
+      }
+   ) \
+   .to_excel("03_pandas_core/bikeshop_revenue_wide.xlsx")
 
 # Melt (Pivoting Longer)
+bikeshop_revenue_long_df =pd.read_excel("03_pandas_core/bikeshop_revenue_wide.xlsx") \
+   .iloc[:, 1:] \
+   .melt(
+      value_vars = ["Mountain", "Road"],
+      var_name = "Category 1",
+      value_name = "Revenue", 
+      id_vars = "Bikeshop Name"
+   )
+   
+from plotnine import (
+   ggplot, aes, geom_col, 
+   facet_wrap, theme_minimal, 
+   coord_flip
+   )
 
+ggplot(
+   data = bikeshop_revenue_long_df, 
+   mapping = aes(x = "Bikeshop Name", y = "Revenue", fill = "Category 1")) +\
+   coord_flip() +\
+   geom_col() +\
+   facet_wrap("Category 1")
 
+#Create an ordered list of bikeshop names by revenue    
+bikeshop_order = bikeshop_revenue_long_df \
+      .groupby("Bikeshop Name") \
+      .sum() \
+      .sort_values("Revenue") \
+      .index \
+      .tolist()
+
+bikeshop_revenue_long_df["Bikeshop Name"] = pd.Categorical(bikeshop_revenue_long_df['Bikeshop Name'], categories = bikeshop_order)|
+
+bikeshop_revenue_long_df.info() 
+
+ggplot(
+   data = bikeshop_revenue_long_df, 
+   mapping = aes(x = "Bikeshop Name", y = "Revenue", fill = "Category 1")) +\
+   coord_flip() +\
+   geom_col() +\
+   facet_wrap("Category 1") +\
+   theme_minimal()
 
 # 7.2 Pivot Table (Pivot + Summarization, Excel Pivot Table)
 
