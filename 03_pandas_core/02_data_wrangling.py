@@ -432,39 +432,95 @@ ggplot(
    theme_minimal()
 
 # 7.2 Pivot Table (Pivot + Summarization, Excel Pivot Table)
+df \
+   .pivot_table (
+    columns = None, 
+    values = "total_price",
+    index = "category_1",
+    aggfunc = np.sum #default is mean  
+   )
 
-
+df \
+   .pivot_table (
+    columns = "frame_material", 
+    values = "total_price",
+    index = "category_1",
+    aggfunc = np.sum #default is mean  
+   )
+   
+df \
+   .pivot_table (
+    columns = None, 
+    values = "total_price",
+    index = ["category_1", "frame_material"],
+    aggfunc = np.sum #default is mean  
+   )
+   
+sales_by_cat1_cat2_year_df = df \
+   .assign(year = lambda x: x.order_date.dt.year) \
+   .pivot_table(
+      columns = "year",
+      aggfunc = np.sum, 
+      index = ["category_1", "category_2"], 
+      values = ["total_price"]
+   )
+#invert the data by switching the columns and the index 
 
 # 7.3 Stack & Unstack ----
 
 # Unstack - Pivots Wider 1 Level (Pivot)
 
+ sales_by_cat1_cat2_year_df \
+    .unstack( #with no options, pivots inner most level, cat 2 for this df 
+    fill_value = 0,
+    level = 0
+    )
+    
 # Stack - Pivots Longer 1 Level (Melt)
-
+sales_by_cat1_cat2_year_df \
+   .stack(
+      level = "year"
+   )
 
 # 8.0 JOINING DATA ----
-
+orderlines_df = pd.read_excel("00_data_raw/orderlines.xlsx")
+bikes_df = pd.read_excel("00_data_raw/bikes.xlsx")
 
 # Merge (Joining)
-
+pd.merge(
+   left = orderlines_df, 
+   right = bikes_df,
+   left_on = "product.id",
+   right_on = "bike.id"
+)
 
 # Concatenate (Binding)
 
-# Columns 
+# Rows
+df_1 = df.head(5)
+df_2 = df.tail(5)
 
+pd.concat([df_1, df_2], axis = 0)
 
-# Rows 
+# Columns
+df_1 = df.iloc[:, :5]
+df_2 = df.iloc[: , -5:] 
 
+pd.concat([df_1, df_2], axis = 1)
 
 
 # 9.0 SPLITTING (SEPARATING) COLUMNS AND COMBINING (UNITING) COLUMNS
 
 # Separate
-
+df_2= df['order_date'].astype('str').str.split("-", expand = True) \
+    .set_axis(["year", "month", "day"], axis = 1)
 
 # Combine
+pd.concat([df, df_2], axis = 1)
 
-
+df_2 
+df_2.year
+df_2['year'] + "-" + df_2['month'] + "-" + df_2['day']
 
 # 10.0 APPLY 
 # - Apply functions across rows 
