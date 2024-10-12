@@ -525,12 +525,54 @@ df_2['year'] + "-" + df_2['month'] + "-" + df_2['day']
 # 10.0 APPLY 
 # - Apply functions across rows 
 
+sales_cat2_daily_df = df[['category_2','order_date', 'total_price']] \
+      .groupby(["category_2",
+             pd.Grouper(
+                key= "order_date",
+                freq = "D")]) \
+   .sum()
+   
+   
+sales_cat2_daily_df.apply(np.mean)
 
+sales_cat2_daily_df.apply(np.sqrt)
 
+sales_cat2_daily_df.apply(np.mean, result_type ="broadcast")
+sales_cat2_daily_df.apply(lambda x: np.repeat(np.mean(x), len(x)))
+
+sales_cat2_daily_df  \
+    .groupby('category_2') \
+    .apply(np.mean)
+ 
+# Grouped Broadcast-- Use transform    
+sales_cat2_daily_df  \
+    .groupby('category_2') \
+    .apply(lambda x: np.repeat(np.mean(x), len(x)))
+    
+sales_cat2_daily_df \
+   .groupby('category_2') \
+   .transform(np.sqrt) 
+ 
+    
 # 11.0 PIPE 
 # - Functional programming helper for "data" functions
 
+data = df
+def add_column(data, **kwargs) :
+   
+   data_copy = data.copy()
+   
+   #print(kwargs)
+   
+   data_copy[list(kwargs.keys())] = pd.DataFrame(kwargs)
+   
+   return data_copy
 
+add_column(df, total_price_2 = df.total_price *2)
+
+
+df \
+   .pipe(add_column, category_2_lower = df['category_2'].str.lower())
 
 
 
