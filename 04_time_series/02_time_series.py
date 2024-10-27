@@ -109,29 +109,93 @@ bike_sales_cat2_m_wide_df
 # Difference from Previous Timestamp
 
 #  - Single (No Groups)
+#creates intermediate column and shows difference 
+bike_sales_m_df \
+    .assign(total_price_lag1 = lambda x: x['total_price'].shift(1)) \
+    .assign(difference = lambda x: x.total_price - x.total_price_lag1) \
+    .plot(y = 'difference')
 
+#without generating intermediate columns, shows percent change
 
+bike_sales_m_df \
+    .apply(lambda x: (x- x.shift(1)) / x.shift(1)) \
+    .plot()
 
 #  - Multiple Groups: Key is to use wide format with apply
 
-
-
+bike_sales_cat2_m_wide_df \
+    .apply(lambda x: x - x.shift(1))\
+    .plot()
+    
 
 #  - Difference from First Timestamp
 
+bike_sales_m_df \
+    .apply(lambda x: (x-x[0])) \
+    .plot()
 
+bike_sales_cat2_m_wide_df \
+    .apply(lambda x: (x-x[0])) \
+    .plot()
 
 
 # CUMULATIVE CALCULATIONS
 
-
+bike_sales_m_df \
+    .resample('YS') \
+    .sum() \
+    .cumsum() \
+    .reset_index() \
+    .assign(order_date = lambda x: x.order_date.dt.to_period()) \
+    .set_index("order_date") \
+    .plot(kind = "bar")
+    
+bike_sales_cat2_m_wide_df \
+    .set_index("order_date") \
+    .resample('Y') \
+    .sum() \
+    .cumsum() \
+    .plot(kind = "bar",stacked = True)
 
 # ROLLING CALCULATIONS
 
 # Single
+#pd.Series.rolling(): window size; use the same unit measure from the data. 
+# window size only, right aligns,
+# center = True, center aligns the rolling average,
+# min_periods, reduces the number of missing values, this creates a partial window 
+bike_sales_m_df \
+    .assign(
+        total_price_roll12 = lambda x : x['total_price']\
+            .rolling(
+                window = 12, 
+                center = True, 
+                min_periods = 1
+                ) \
+            .mean()
+    ) \
+    .plot()
 
 # Groups - Can't use assign(), we'll use merging
 
+bike_sales_cat2_m_wide_df \
+    .set_index('order_date') \
+    .apply(
+        lambda x: x.rolling(
+            window = 24,
+            center = True,
+            min_periods = 1
+        ) \
+        .mean()
+    ) \
+    .rename(lambda x: x + "_roll_24", axis = 1) \
+    .merge(
+        bike_sales_cat2_m_wide_df,
+        how = "right",
+        left_index = True, 
+        right_index = True
+    ) \
+    .plot()
 
 
 
