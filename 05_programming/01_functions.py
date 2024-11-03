@@ -47,7 +47,37 @@ pd.DataFrame.aggregate(
 # 2.0 OUTLIER DETECTION FUNCTION ----
 # - Works with a Pandas Series
 
+x = df['total_price']
+def detect_outliers(x, iqr_multipier = 1.5, how = "both") :
+   
+   #IQR Logic
+    q75 = np.quantile(x, 0.75) #price for 75th quantile 
+    q25 = np.quantile(x, 0.25) #price for  25th quantile 
+    iqr = q75 -  q25 #inner quantile range
+    
+    lower_limit = q25 - iqr_multipier * iqr
+    upper_limit = q75 + iqr_multipier * iqr
+     
+    outliers_upper = x >= upper_limit #logic for returning outliers 
+    outliers_lower = x <= lower_limit
+    
+    if how == "both":
+        outliers = outliers_upper | outliers_lower
+    elif how == "lower":
+        outliers = outliers_lower 
+    else: 
+        outliers = outliers_upper
+        
+    return outliers
 
+detect_outliers(x, iqr_multipier= 0.1)
+
+df[
+    detect_outliers(
+        df['total_price'], 
+        iqr_multipier= 0.1,
+        how = "lower")
+]
 
 
 # 3.0 EXTENDING A CLASS ----
