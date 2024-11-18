@@ -37,6 +37,8 @@ def summarize_by_time(data,
                       **kwargs
                       ):
     #Checks
+    if type(value_column) is not list:
+        value_column = [value_column]
     #Body
     
     #Handle date column
@@ -49,9 +51,12 @@ def summarize_by_time(data,
     #Handle resample
     data = data.resample(rule = rule, kind = kind)
 
-    #Handle Aggregation
+    #Handle Aggregatio
+    function_list = [agg_func] * len(value_column)
+    agg_dict      = dict(zip(value_column, function_list))
+    
     data = data.agg(
-        func = agg_func,
+        func = agg_dict,
         *args, 
         **kwargs
     )
@@ -62,9 +67,10 @@ data = df
 
 summarize_by_time(data, 
                   date_column = 'order_date', 
-                  value_column= 'total_price', 
-                  groups = ['category_1', 'category_2'],
-                  rule = "M"
+                  value_column= ['total_price', 'quantity'], 
+                  groups = ['category_2'],
+                  rule = "M", 
+                  agg_func= [np.mean, np.sum]
                   )
     
 
