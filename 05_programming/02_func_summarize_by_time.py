@@ -33,6 +33,8 @@ def summarize_by_time(data,
                       rule = "D", 
                       kind = "timestamp",
                       agg_func = np.sum,
+                      wide_format = True,
+                      fillna = 0,
                       *args,
                       **kwargs
                       ):
@@ -61,6 +63,14 @@ def summarize_by_time(data,
         **kwargs
     )
     
+    #Handle Pivot Wider
+    if wide_format: 
+        if groups is not None: 
+            data = data.unstack(groups)
+            if(kind == 'period'):
+                data.index = data.index.to_period() 
+    data = data.fillna(fillna)
+    
     return data
 
 data = df
@@ -70,7 +80,10 @@ summarize_by_time(data,
                   value_column= ['total_price', 'quantity'], 
                   groups = ['category_2'],
                   rule = "M", 
-                  agg_func= [np.mean, np.sum]
+                  kind = "timestamp",
+                  agg_func= [np.mean, np.sum], 
+                  fillna = 0,
+                  wide_format= True
                   )
     
 
