@@ -43,7 +43,7 @@ bike_sales_m_df
 
 y = bike_sales_m_df['total_price'] #converts to pandas series
 
-h = 24
+h = 12
 forecaster = AutoARIMA(sp = 12) #AutoARIMA is not good at determining if data has seasonality
 
 forecaster.fit(y)
@@ -74,38 +74,52 @@ df = bike_sales_cat2_m_df
 
 df[df.columns[0]] #pulls out a column at a time, set up for loop
 
+col=df.columns[0]
+
 #Storing the results in a dictionary
 model_results_dict = {}
 for col in tqdm(df.columns):
     #Series extraction
     y = df[col]
+    y.name= col[1]
     
     #Modeling
     forecaster = AutoARIMA(
-        sp = 12, 
+        sp = 1, 
         suppress_warnings= True 
     )
+    
     forecaster.fit(y)
+    
     h = 12
     
     #Prediction and Confidence Interval
     predictions = forecaster.predict(fh = np.arange(1, h+1))
+    predictions.index.name='order_date'
+    predictions.name= predictions.name[1]
+    
     predictions_conf_int = forecaster.predict_interval(
         fh =np.arange(1, h+1),
         coverage = 0.95
     )
-    predictions
-    predictions_conf_int
+
     
     #Combine into dataframe
-    ret= pd.concat([y,predictions, predictions_conf_int], axis = 0)
-    ret.column = ["value", "prediction", "ci_lo", "ci_hi"]
+    predictions_conf_int.columns=[ "ci_lo", "ci_hi"]
+    predictions_conf_int.index.name='order_date'
+    
+    ret= pd.concat([y,predictions, predictions_conf_int], axis = 1)
+    ret.columns = ["value", "predictions", "ci_lo", "ci_hi"]
     
     #update dictionary
     model_results_dict[col] = ret
 
-model_results_dict    
-model_result_df = pd.concat(model_results_dict) 
+model_results_dict 
+
+   
+model_result_df = pd.concat(model_results_dict, axis = 0) 
+
+model_result_df
     
 #visualization
 model_results_dict[list(model_results_dict.keys())[2]].plot() 
