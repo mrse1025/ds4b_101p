@@ -120,7 +120,9 @@ model_results_dict
 model_result_df = pd.concat(model_results_dict, axis = 0) 
 
 model_result_df
-    
+model_results_dict.keys()
+model_results_dict[('total_price', 'Cross Country Race')]
+
 #visualization
 model_results_dict[list(model_results_dict.keys())[2]].plot() 
    
