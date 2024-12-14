@@ -96,9 +96,9 @@ def arima_forecast(data, h, sp, alpha = 0.05,
     ret = model_results_df.reset_index()
     
     # Drop columns containing 'level'
-    cols_to_keep = ~ret.columns.str.startswith("level_")
+    #cols_to_keep = ~ret.columns.str.startswith("level_")
     
-    ret = ret.iloc[:,cols_to_keep]
+    #ret = ret.iloc[:,cols_to_keep]
 
     return ret
 
@@ -116,3 +116,17 @@ arima_forecast(
     h = 12, 
     sp = 1
 )
+
+
+from my_panda_extensions.forecasting import arima_forecast
+#Checking import and model checks before arima function
+forecast_df = bike_sales_cat2_m_df \
+    .arima_forecast(
+        h = 12, 
+        sp = 1
+    )
+
+forecast_df \
+    .groupby('category_2') \
+    .plot(x = 'order_date')
+
