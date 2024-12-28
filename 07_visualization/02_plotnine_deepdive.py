@@ -2,13 +2,24 @@
 # Module 7 (Plotnine): Plotnine Deep-Dive ----
 
 # Imports
+import pandas as pd
+import numpy as np
+import matplotlib
+
+from my_panda_extensions.database import collect_data
+from my_panda_extensions.timeseries import summarize_by_time
+import plotnine
+from plotnine import *
+
+
 
 
 # Matplotlib stylings
 
 
 # Data
-
+df = collect_data()
+df
 
 
 # 1.0 Scatter Plots ----
@@ -17,8 +28,21 @@
 # Goal: Explain relationship between order line value
 #  and quantity of bikes sold
 
+#Step 1: Data Manipulation
+quantity_total_price_by_order_df = df [['order_id',
+                                        'quantity',
+                                        'total_price']] \
+        .groupby('order_id') \
+        .sum()\
+        .reset_index()
 
-
+ #Step 2: Data Visualization
+(
+    ggplot(data=quantity_total_price_by_order_df, mapping=aes(x='quantity', y='total_price'))
+    + geom_point(alpha=0.2)
+    + labs(title='Order Line Value vs Quantity Sold', x='Quantity Sold', y='Order Line Value')
+    + geom_smooth(method='lm', color='blue')
+)
 
 # 2.0 Line Plot ----
 # - Great for time series
@@ -26,29 +50,52 @@
 # Goal: Describe revenue by Month, expose cyclic nature
 
 # Step 1: Data Manipulation
-
+bike_sales_m_df= df\
+   .summarize_by_time(
+        date_column = 'order_date',
+        value_column = 'total_price',
+        rule = 'M',
+        kind = 'timestamp')\
+        .reset_index()
 
 
 # Step 2: Plot
-
-
+(
+        ggplot(data = bike_sales_m_df, mapping=aes(x='order_date', y='total_price')
+        )
+        + geom_line()
+        + geom_smooth(method = 'lm', color = 'blue', se = False)
+        + geom_smooth(method = 'loess', color = 'red', se = False)
+)
 
 
 # 3.0 Bar / Column Plots ----
 # - Great for categories
 
+# Reorder categories by total_price
 # Goal: Sales by Descriptive Category
 
 # Step 1: Data Manipulation
-
+bike_sales_cat2_df =df \
+  .groupby('category_2')\
+  .agg(
+      {'total_price':np.sum}
+  ) \
+  .reset_index() \
+  .sort_values('total_price', ascending = False) \
+  .assign()
 
 # Aside: Categorical Data (pd.Categorical)
 # - Used frequently in plotting to designate order of categorical data
 
-
-
 # Step 2: Plot
-
+(
+    ggplot(mapping = aes('category_2', 'total_price'), 
+           data = bike_sales_cat2_df) +
+           geom_col(fill = "#2c3e50") +
+           coord_flip() +
+           theme_minimal()
+)
 
 
 # 4.0 Histogram / Density Plots ----

@@ -21,9 +21,8 @@ dependencies:
   - pip
   - pip:
       # Core Data
-      - numpy==1.20.2
       - pandas==1.2.2
-
+      - numpy==1.19.5
       # R Data
       - plydata==0.4.3
       - siuba==0.0.24
@@ -45,7 +44,7 @@ dependencies:
       - statsmodels
       - nltk==3.5
       - h2o==3.32.0.3
-      - pycaret==2.3.0
+      - pycaret==2.3.1
       - scikit-learn==0.23.2
       - xgboost==0.90
       - lightgbm==3.1.1
@@ -59,9 +58,9 @@ dependencies:
       - tsfresh==0.17.0
 
       # Scalability & Automation
-      - dask==2.30.0
-      - dask-ml==1.8.0
-      - dask-xgboost==0.1.11
+      - dask
+      - dask-ml
+      - dask-xgboost
       - zict==1.0.0
       - joblib==1.0.1
 
