@@ -106,14 +106,26 @@ bike_sales_cat2_df =df \
 # Histogram ----
 
 # Step 1: Data Manipulation
-
+#investigate the models 
+unit_price_by_frame_df = df[['model', 'frame_material', 'price']] \
+    .drop_duplicates ()
 
 # Step 2: Visualize
+g_canvas = ggplot(data = unit_price_by_frame_df, 
+           mapping = aes("price", fill = "frame_material")) 
 
+g2= g_canvas + geom_histogram(bins = 25, 
+                          color = "white")
+
+g1 = g_canvas + geom_histogram(bins = 25, 
+                               color = "white", 
+                               fill = "#2c3e50")
+g2 + facet_grid(['frame_material'])
 
 # Density ----
+g3 = g_canvas +geom_density(alpha = 0.3)
 
-
+g3 + facet_wrap("frame_material", ncol = 1)
 
 
 # 5.0 Box Plot / Violin Plot ----
@@ -122,17 +134,32 @@ bike_sales_cat2_df =df \
 # Goal: Unit price of model, segmenting by category 2
 
 # Step 1: Data Manipulation
-
-
+unit_price_by_cat2_price = df[['model', 'category_2', 'price']] \
+    .drop_duplicates() \
+    .assign(
+        category_2 = lambda x: pd.CategoricalIndex(x['category_2']).reorder_categories(
+            df.groupby("category_2")["price"].median().sort_values().index
+            
+    )
+)
 
 # Step 2: Visualize
 
 # Box Plot
-
+(
+    ggplot(aes('category_2', 'price'), unit_price_by_cat2_price)
+    + geom_boxplot () 
+    + coord_flip()
+)
 
 
 # Violin Plot & Jitter Plot
-
+(
+    ggplot(aes('category_2', 'price'), unit_price_by_cat2_price)
+    + geom_violin()
+    + geom_jitter(alpha = 0.2, color = 'red')
+    + coord_flip()
+)
 
 
 # 6.0 Adding Text & Label Geometries----
