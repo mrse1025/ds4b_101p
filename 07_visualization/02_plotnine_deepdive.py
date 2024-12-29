@@ -83,7 +83,12 @@ bike_sales_cat2_df =df \
   ) \
   .reset_index() \
   .sort_values('total_price', ascending = False) \
-  .assign()
+  .assign(
+        category_2 = lambda x: pd.CategoricalIndex(x['category_2']).reorder_categories(
+            df.groupby("category_2")["price"].median().sort_values().index
+            
+    )
+)
 
 # Aside: Categorical Data (pd.Categorical)
 # - Used frequently in plotting to designate order of categorical data
