@@ -2,9 +2,11 @@
 # Module 7 (Plotnine): Plotnine Deep-Dive ----
 
 # Imports
+import mizani.formatters
 import pandas as pd
 import numpy as np
 import matplotlib
+import mizani 
 
 from my_panda_extensions.database import collect_data
 from my_panda_extensions.timeseries import summarize_by_time
@@ -172,12 +174,42 @@ unit_price_by_cat2_price = df[['model', 'category_2', 'price']] \
 # Goal: Exposing sales over time, highlighting outlier
 
 # Data Manipulation
+usd = mizani.formatters.currency_format(prefix = "$", big_mark = ",", precision= 0)
+usd([100, 1000, 1e10])
 
+bike_sales_y_df=df \
+    .summarize_by_time(
+        date_column = 'order_date',
+        value_column = 'total_price',
+        rule = 'Y'
+     ) \
+    .reset_index() \
+    .assign(
+        total_price_text = lambda x: usd(x['total_price'])
+    )
 
 
 # Adding text to bar chart
 # Filtering labels to highlight a point
 
+(
+    ggplot(aes ('order_date', 'total_price'), bike_sales_y_df) \
+    + geom_col(fill = "#2c3e50") 
+    + geom_smooth(method = 'lm', se = False, color = 'dodgerblue')
+    + geom_text(aes(label = 'total_price_text'), nudge_y = -3.2e5, color = "white"
+    )
+    + geom_label(
+        label = "Major Demand", 
+        color = "red",
+        data = bike_sales_y_df[bike_sales_y_df.order_date.dt.year==2013], 
+        nudge_y = 1.2e6,
+        size = 10
+    )
+    + expand_limits(y = [0, 20e6])
+    + scale_x_datetime(date_labels= "%Y")
+    + scale_y_continuous(labels=usd)
+    +theme_minimal()
+    )
 
 
 # 7.0 Facets, Scales, Themes, and Labs ----
