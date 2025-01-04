@@ -221,14 +221,61 @@ bike_sales_y_df=df \
 # Goal: Monthly Sales by Categories
 
 # Step 1: Format Data
-
+bike_sales_cat2_m_df = df \
+    .summarize_by_time(
+        date_column = 'order_date',
+        value_column = 'total_price',
+        groups = 'category_2',
+        rule = 'M',
+        wide_format = False
+    ) \
+    .reset_index()
 
 # Step 2: Visualize
+matplotlib.pyplot.style.use('default')
+g = (
+    ggplot(mapping = aes('order_date', 'total_price', color = 'category_2'),
+           data = bike_sales_cat2_m_df)  
++ geom_line()
++ geom_smooth(span = 0.2, se = False, color = 'pink')
++ facet_wrap('category_2', ncol = 3, scales = 'free_y')
++ scale_x_datetime(date_labels = "%Y")
++ scale_y_continuous(labels=usd)
++ scale_color_cmap_d()
++ theme_matplotlib()
++ theme(
+    strip_background = element_rect(fill = 'black'),
+    legend_position= "none",
+    figure_size=(16,8),
+    subplots_adjust={'wspace': 0.25}
+)
++labs(title="Revenue by Month and Category 2",
+x = "Date",
+y = "Revenue"
+)
+)
 
+g.save("07_visualization/bike_sales_cat2_m_df.jpg")
 
+#Challenge
 
-
-
-
-
-
+(
+    ggplot(mapping = aes('order_date', 'total_price'),
+           data = bike_sales_cat2_m_df)  
++ geom_line(color = '#2e3e50')
++ geom_smooth(span = 0.2, se = False, color = 'dodgerblue')
++ facet_wrap('category_2', ncol = 3, scales = 'free_y')
++ scale_x_datetime(date_labels = "%Y")
++ scale_y_continuous(labels=usd)
++ theme(
+    strip_background = element_rect(fill = '#2c3e50'),
+    strip_text = element_text(color = "white"),
+    legend_position= "none",
+    figure_size=(16,8),
+    subplots_adjust={'wspace': 0.25}
+)
++labs(title="Revenue by Month and Category 2",
+x = "Date",
+y = "Revenue"
+)
+)
