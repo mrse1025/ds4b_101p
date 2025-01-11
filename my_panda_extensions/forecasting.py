@@ -12,6 +12,11 @@ from sktime.utils.plotting import plot_series
 from tqdm import tqdm
 
 import pandas_flavor as pf
+#Plotting 
+from plotnine import *
+from mizani.formatters import *
+#from plydata.cat_tools import *
+
 
 @pf.register_dataframe_method
 
@@ -112,3 +117,67 @@ def arima_forecast(data, h, sp, alpha = 0.05,
     ret = ret.iloc[:, cols_to_keep]
 
     return ret
+
+#Plotting Function
+def plot_forecast(
+    data, 
+    id_column, 
+    date_column,
+    facet_ncol = 1,
+    facet_scales = 'free_y',
+    date_labels = "%Y",
+    date_breaks = "2 years",
+    ribbon_alpha = 0.2,
+    wspace = 0.25, 
+    figure_size = (16, 8)
+):
+    #Data Wrangling
+    df_prepped= arima_forecast_df \
+        .loc[:, required_columns] \
+        .melt(
+            value_vars = ['value', 'predictions'], 
+            id_vars = [id_column, date_column, 'ci_lo', 'ci_hi'],
+            value_name = '.value'
+        ) \
+    .rename({'.value': 'value'}, axis = 1) 
+
+    #Check for period convert to datetime64
+    if df_prepped[date_column].dtype != 'datetime64[ns]':
+        #Try changing to timestamp
+        try:
+            df_prepped[date_column] = df_prepped[date_column].dt.to_timestamp()
+        except: 
+            try:
+                df_prepped[date_column]= pd.to_datetime(df_prepped[date_column])
+            except:
+                raise Exception("Could not aut convert 'date_column' datetime64.")
+    
+    #Preparing the plot
+    g = ggplot(df_prepped, 
+            mapping = aes(x = date_column, y = 'value', color = 'variable')) \
+    + geom_line() \
+    + geom_ribbon(mapping = aes(ymin = 'ci_lo', ymax = 'ci_hi'),
+               alpha = ribbon_alpha, 
+               color = None) \
+    + facet_wrap(id_column, 
+                scales = facet_scales, 
+                ncol =facet_ncol) 
+    g = g\
+        + scale_x_datetime(date_labels= date_labels,
+                             date_breaks= date_breaks) \
+        + scale_y_continuous(labels = label_dollar(big_mark= ",", precision= 0)) \
+        + scale_color_manual(values = ['red', '#2c3e50']
+        ) 
+    g = g \
+       + theme_minimal() \
+       + theme(
+                legend_position= "none", 
+            subplots_adjust={'wspace': wspace},
+            figure_size= figure_size
+        )\
+       + labs( title = "Forecast Plot", 
+            x = "Date",
+            y = "Revenue"
+        )
+
+    return g
