@@ -83,7 +83,7 @@ def plot_forecast(
     figure_size = (16, 8)
 ):
     #Data Wrangling
-    df_prepped= arima_forecast_df \
+    df_prepped= data \
         .loc[:, required_columns] \
         .melt(
             value_vars = ['value', 'predictions'], 
@@ -149,15 +149,19 @@ arima_forecast_df = df \
         sp = 1
     )
 
-plot_forecast(data = arima_forecast_df, 
+# plot_forecast(data = arima_forecast_df, 
+#                 id_column = 'category_2', 
+#                 date_column = 'order_date',
+#                 facet_ncol= 1,
+#                 facet_scales= None,
+#                 date_breaks= "2 year",
+#                 figure_size= (8,8))
+
+from my_panda_extensions.forecasting import plot_forecast
+arima_forecast_df.plot_forecast(
                 id_column = 'category_2', 
-                date_column = 'order_date',
-                facet_ncol= 1,
-                facet_scales= None,
-                date_breaks= "2 year",
-                figure_size= (8,8))
-
-
+                date_column = 'order_date', 
+                facet_ncol= 3)
 
 
 

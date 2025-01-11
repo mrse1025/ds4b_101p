@@ -117,7 +117,7 @@ def arima_forecast(data, h, sp, alpha = 0.05,
     ret = ret.iloc[:, cols_to_keep]
 
     return ret
-
+@pf.register_dataframe_method
 #Plotting Function
 def plot_forecast(
     data, 
@@ -129,11 +129,33 @@ def plot_forecast(
     date_breaks = "2 years",
     ribbon_alpha = 0.2,
     wspace = 0.25, 
-    figure_size = (16, 8)
+    figure_size = (16, 8),
+    title = "Forecast Plot",
+    xlab = "Date",
+    ylab = "Revenue"
 ):
+    """Automates the forecast visualization
+    Args:
+        data (DataFrame): A pandas data frame that is the output
+            of the arima_forecast() function.  
+        id_column (str): [description]
+        date_column (str): The timestamp column.
+        facet_ncol (int, optional): Number of faceting columns. Defaults to 1.
+        facet_scales (str, optional): One of None, "free", "free_y", "free_x". Defaults to "free_y".
+        date_labels (str, optional): The strftime format for the x-axis date label. Defaults to "%Y".
+        date_breaks (str, optional): Locations for the date breaks on the x-axis. Defaults to "1 year".
+        ribbon_alpha (float, optional): The opacity of the confidence intervals. Defaults to 0.2.
+        wspace (float, optional): The whitespace to include between subplots. Defaults to 0.25.
+        figure_size (tuple, optional): The aspect ratio for the plot. Defaults to (16,8).
+        title (str, optional): The plot title. Defaults to "Forecast Plot".
+        xlab (str, optional): The x-axis label. Defaults to "Date".
+        ylab (str, optional): The y-axis label. Defaults to "Revenue".
+    Returns:
+        [gglot]: Returns a plotnine ggplot object
+    """
     #Data Wrangling
-    df_prepped= arima_forecast_df \
-        .loc[:, required_columns] \
+    df_prepped= data \
+        .loc[:, [id_column, date_column, 'value', 'predictions', 'ci_lo', 'ci_hi']] \
         .melt(
             value_vars = ['value', 'predictions'], 
             id_vars = [id_column, date_column, 'ci_lo', 'ci_hi'],
@@ -175,9 +197,9 @@ def plot_forecast(
             subplots_adjust={'wspace': wspace},
             figure_size= figure_size
         )\
-       + labs( title = "Forecast Plot", 
-            x = "Date",
-            y = "Revenue"
+       + labs( title = title, 
+            x = xlab,
+            y = ylab
         )
 
     return g
