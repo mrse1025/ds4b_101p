@@ -2,7 +2,11 @@
 # Module 8 (SQL Database Update): Forecast Automation ----
 
 # IMPORTS ----
-
+import sqlalchemy as sql
+from sqlalchemy.types import String, Numeric
+from sqlalchemy import Table, MetaData
+import pandas as pd
+import numpy as np
 
 # 1.0 SUMMARIZE AND FORECAST ----
 
