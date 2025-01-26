@@ -153,3 +153,4 @@ def read_forecast_from_database(
     conn.close()
     # Return the results
     return df
+    

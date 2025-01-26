@@ -91,6 +91,7 @@ def collect_data(conn_string = "sqlite:///00_database/bike_orders_database.sqlit
     return df
 
 #Prep data
+@pf.register_dataframe_method
 def prep_forecast_data_for_update(data, id_column, date_column):
     df = data.rename (
             {
@@ -106,6 +107,8 @@ def prep_forecast_data_for_update(data, id_column, date_column):
         col_text = ', '.join(required_col_names)
         raise Exception(f"Columns must contain : {col_text}")
     
+    #reoder columns
+    df = df[required_col_names]
     return(df)
 
 #Write to database
