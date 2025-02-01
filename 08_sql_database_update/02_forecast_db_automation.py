@@ -102,12 +102,48 @@ pd.concat([forecast_1_df, forecast_2_df, forecast_3_df], axis = 0) \
     )
 
 # 1.4 Revenue by Customer ----
+forecast4_df = df \
+    .summarize_by_time(
+        date_column = "order_date",
+        value_column = "total_price",
+        groups = "bikeshop_name",
+        rule = "Q",
+        kind = "timestamp"
+    ) \
+    .arima_forecast(
+        h = 4,
+        sp = 4
+    ) \
+    .prep_forecast_data_for_update(
+        id_column = "bikeshop_name",
+        date_column = "order_date"
+    )
+
+pd.concat([forecast_1_df, 
+            forecast_2_df, 
+            forecast_3_df, 
+            forecast4_df], 
+            axis = 0) \
+    .plot_forecast(
+        id_column = "id",
+        date_column = "date",
+        facet_ncol = 3
+    )
 
 
 # 2.0 UPDATE DATABASE ----
-
+all_forecasts_df =pd.concat([forecast_1_df, 
+            forecast_2_df, 
+            forecast_3_df, 
+            forecast4_df], 
+            axis = 0)
 
 # 2.1 Write to Database ----
-
+all_forecasts_df \
+    .write_forecast_to_database(
+        id_column = "id",
+        date_column = "date",
+        if_exists = "replace"
+    )
 
 # 2.2 Read from Database ----

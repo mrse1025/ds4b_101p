@@ -112,12 +112,13 @@ def prep_forecast_data_for_update(data, id_column, date_column):
     return(df)
 
 #Write to database
+@pf.register_dataframe_method
 def write_forecast_to_database(
     data, id_column, date_column, 
     conn_string = 'sqlite:///00_database/bike_orders_database.sqlite',
     table_name = "forecast", 
-    if_exists = "fail",
-    **kwargs
+    if_exists = "fail"
+    #**kwargs
 ):
     """Writes the forecast table to the database
     Args:
