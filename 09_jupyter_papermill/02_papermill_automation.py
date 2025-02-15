@@ -31,7 +31,7 @@ id_sets = [
     list(ids_bikeshop)
 ]
 
-id_sets[3]
+id_sets[0]
 
 # 2.0 SETUP DIRECTORY ----
 
@@ -67,14 +67,14 @@ if not dir_exists:
 # Iterating without a loop
 #Key variables 
 
-i = 1
+i = 3
 template_path = pathlib.Path("09_jupyter_papermill/template/jupyter_report_template.ipynb")
 
 output_path = pathlib.Path(f"09_jupyter_papermill/reports/sales_report_{i}.ipynb")
 
 params = {
     'ids': id_sets[i],
-    'title': f"Sales Report {i + 1}",
+    'title': f"Sales Report {i}",
     'data': df.to_json()
 }
 
