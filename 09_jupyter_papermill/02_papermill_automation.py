@@ -78,15 +78,33 @@ params = {
     'data': df.to_json()
 }
 
+pm.execute_notebook(
+    input_path= template_path,
+    output_path= output_path,
+    parameters= params,
+    report_mode= True
+)
+
 #data_from_json = pd.read_json('C:/Users/mrse1025/OneDrive/Desktop/ds4b_101p/00_data_raw/data.json')
 
 # Iterating with for-loop and enumerate()
-pm.execute_notebook(
-    input_path=template_path,
-    output_path=output_path,
-    parameters=params,
-    report_mode=True
-)
 
+for i, id_set in enumerate(id_sets):
 
+    template_path = pathlib.Path("09_jupyter_papermill/template/jupyter_report_template.ipynb")
+
+    output_path = pathlib.Path(f"09_jupyter_papermill/reports/sales_report_{i}.ipynb")
+
+    params = {
+    'ids': id_set,
+    'title': f"Sales Report {i}",
+    'data': df.to_json()
+    }
+
+    pm.execute_notebook(
+    input_path= template_path,
+    output_path= output_path,
+    parameters= params,
+    report_mode= True
+    )
 
